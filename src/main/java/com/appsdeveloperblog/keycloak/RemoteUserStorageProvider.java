@@ -63,6 +63,7 @@ public class RemoteUserStorageProvider implements UserLookupProvider, Credential
 
 	@Override
 	public boolean isValid(RealmModel realm, UserModel user, CredentialInput credentialInput) {
+		System.out.println("isValid methoduna girdi,credentialInput.getChallengeResponse(): "+ credentialInput.getChallengeResponse());
 		VerifyPasswordResponse verifyPasswordResponse = usersService.verifyUserPassword(user.getUsername(),
 				credentialInput.getChallengeResponse());
 

@@ -47,51 +47,60 @@
 			<version>21.1.1</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		 <!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-model-legacy -->
 		<dependency>
 		    <groupId>org.keycloak</groupId>
 		    <artifactId>keycloak-model-legacy</artifactId>
 		    <version>21.1.1</version>
 		</dependency>
- 
-	
-	<!--	
- 
-<dependency>
-    <groupId>org.jboss.resteasy</groupId>
-    <artifactId>resteasy-client</artifactId>
-    <version>6.2.4.Final</version>
-</dependency>
- <dependency>
-    <groupId>jakarta.ws.rs</groupId>
-    <artifactId>jakarta.ws.rs-api</artifactId>
-    <version>3.1.0</version>
-</dependency>
- -->
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+        <!--
+     <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-client</artifactId>
+        <version>6.2.4.Final</version>
+    </dependency>
+     <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+     -->
+        <!--UsersApiLegacyServiceRestTest ile test yapabilmek icin dependency ler - start -->
+        <!--		<dependency>-->
+        <!--			<groupId>org.springframework.boot</groupId>-->
+        <!--			<artifactId>spring-boot-starter-test</artifactId>-->
+        <!--			<scope>test</scope>-->
+        <!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		
+        <!--		<dependency>-->
+        <!--			<groupId>org.springframework.boot</groupId>-->
+        <!--			<artifactId>spring-boot-starter-web</artifactId>-->
+        <!--		</dependency>-->
+        <!--UsersApiLegacyServiceRestTest ile test yapabilmek icin dependency ler - end -->
+
 	</dependencies>
 
 	<build>
 	<finalName>my-remote-user-storage-provider</finalName>
 		<!--Rest servis testi yapilirken spring-boot-maven-plugin acilabilir normalde kapali olacak -->
- 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
+<!-- 		<plugins>-->
+<!--			<plugin>-->
+<!--				<groupId>org.springframework.boot</groupId>-->
+<!--				<artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--			</plugin>-->
+
+<!--			&lt;!&ndash;Test islemini skip etmek icin; &ndash;&gt;-->
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-surefire-plugin</artifactId>-->
+<!--				<version>2.22.2</version>-->
+<!--				<configuration>-->
+<!--					<skipTests>true</skipTests>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+<!--		</plugins>-->
 	</build>
 
 </project>
