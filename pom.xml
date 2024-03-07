@@ -54,8 +54,17 @@
 		    <artifactId>keycloak-model-legacy</artifactId>
 		    <version>21.1.1</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.projectlombok</groupId>-->
+<!--			<artifactId>lombok</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.projectlombok</groupId>-->
+<!--			<artifactId>lombok</artifactId>-->
+<!--		</dependency>-->
 
-        <!--
+		<!--
      <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
@@ -84,6 +93,7 @@
 
 	<build>
 	<finalName>my-remote-user-storage-provider</finalName>
+<!--		<finalName>${project.groupId}-${project.artifactId}</finalName>-->
 		<!--Rest servis testi yapilirken spring-boot-maven-plugin acilabilir normalde kapali olacak -->
 <!-- 		<plugins>-->
 <!--			<plugin>-->
@@ -101,6 +111,13 @@
 <!--				</configuration>-->
 <!--			</plugin>-->
 <!--		</plugins>-->
+
+<!--		 		<plugins>-->
+<!--					<plugin>-->
+<!--						<groupId>org.apache.maven.plugins</groupId>-->
+<!--						<artifactId>maven-shade-plugin</artifactId>-->
+<!--					</plugin>-->
+<!--				</plugins>-->
 	</build>
 
 </project>

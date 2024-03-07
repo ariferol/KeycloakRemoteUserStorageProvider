@@ -1,113 +1,214 @@
 package com.appsdeveloperblog.keycloak;
 
+//import lombok.extern.slf4j.Slf4j;
+
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
+import org.keycloak.credential.CredentialInputUpdater;
 import org.keycloak.credential.CredentialInputValidator;
-import org.keycloak.credential.LegacyUserCredentialManager;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.SubjectCredentialManager;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
-import org.keycloak.storage.adapter.AbstractUserAdapter;
 import org.keycloak.storage.user.UserLookupProvider;
+import org.keycloak.storage.user.UserQueryProvider;
+import org.keycloak.storage.user.UserRegistrationProvider;
 
-public class RemoteUserStorageProvider implements UserLookupProvider, CredentialInputValidator, UserStorageProvider {
-	private KeycloakSession session;
-	private ComponentModel model;
-	private UsersApiLegacyService usersService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
-	public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model,
-			UsersApiLegacyService usersService) {
-		this.session = session;
-		this.model = model;
-		this.usersService = usersService;
-	}
+//@Slf4j
+public class RemoteUserStorageProvider implements UserLookupProvider, CredentialInputValidator, UserStorageProvider
+        , UserQueryProvider, CredentialInputUpdater, UserRegistrationProvider {
 
-	protected UserModel createAdapter(RealmModel realm, String username) {
+    private KeycloakSession session;
+    private ComponentModel model;
+    private UsersApiLegacyService usersService;
 
-		// Create a new user adapter based on the AbstractUserAdapter class
-		return new AbstractUserAdapter(session, realm, model) {
+    public RemoteUserStorageProvider(KeycloakSession session, ComponentModel model,
+                                     UsersApiLegacyService usersService) {
+        this.session = session;
+        this.model = model;
+        this.usersService = usersService;
+    }
 
-			// Override the getUsername method to return the username from the remote
-			// service
-			@Override
+    @Override
+    public boolean supportsCredentialType(String credentialType) {
+        return PasswordCredentialModel.TYPE.equals(credentialType);
+    }
 
-			public String getUsername() {
+    @Override
+    public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
+        //new method
+        return supportsCredentialType(credentialType) && user.credentialManager().isConfiguredFor(credentialType);
+    }
 
-				return username;
+//    @Override
+//    public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
+//        //old method
+//        return user.credentialManager().isConfiguredFor(credentialType);
+//    }
 
-			}
+    @Override
+    public boolean isValid(RealmModel realm, UserModel user, CredentialInput credentialInput) {
+        System.out.println("isValid methoduna girdi,credentialInput.getChallengeResponse(): " + credentialInput.getChallengeResponse());
 
-			@Override
-			public SubjectCredentialManager credentialManager() {
+        // Gelen parametre validations;
+        if (!supportsCredentialType(credentialInput.getType()) || !(credentialInput instanceof UserCredentialModel)) {
+            return false;
+        }
+        System.out.println("isValid methoduna gelen getUsername: " + user.getUsername());
+        VerifyPasswordResponse verifyPasswordResponse = usersService.verifyUserPassword(user.getUsername(),
+                credentialInput.getChallengeResponse());
 
-				// Create a new credential manager based on the LegacyUserCredentialManager
-				// class
-				return new LegacyUserCredentialManager(session, realm, this) {
+        if (verifyPasswordResponse == null)
+            return false;
 
-				};
+        return verifyPasswordResponse.getResult();
+    }
 
-			}
+    @Override
+    public UserModel getUserById(RealmModel realm, String id) {
+//        StorageId storageId = new StorageId(id);
+//        String username = storageId.getExternalId();
+//        log.debug("getUserById ye gelen id: {}", id);
+        return findUser(realm, StorageId.externalId(id));
+    }
 
-		};
-	}
+    @Override
+    public UserModel getUserByEmail(RealmModel realm, String email) {
+//        log.debug("getUserByEmail methoduna gelen email: {}", email);
+        System.out.println("getUserByEmail methoduna gelen email: " + email);
+        return findUser(realm, email);
+    }
 
-	@Override
-	public boolean supportsCredentialType(String credentialType) {
+    @Override
+    public void close() {
+        // TODO Auto-generated method stub
+    }
 
-		return PasswordCredentialModel.TYPE.equals(credentialType);
-	}
+    @Override
+    public UserModel getUserByUsername(RealmModel realm, String username) {
+//        log.debug("getUserByUsername methoduna gelen username: {}", username);
+        System.out.println("getUserByUsername methoduna gelen username: " + username);
+        return findUser(realm, username);
+    }
 
-	@Override
-	public boolean isValid(RealmModel realm, UserModel user, CredentialInput credentialInput) {
-		System.out.println("isValid methoduna girdi,credentialInput.getChallengeResponse(): "+ credentialInput.getChallengeResponse());
-		VerifyPasswordResponse verifyPasswordResponse = usersService.verifyUserPassword(user.getUsername(),
-				credentialInput.getChallengeResponse());
+    private UserModel findUser(RealmModel realm, String username) {
+        System.out.println("findUser methoduna giren username: " + username);
+        UserModel userModel = null;
+        try {
+            User user = usersService.getUserByUserName(username);
+            user.setUserName(user.getEmail()); //Bu satir daha sonra kapatilacak!
+            //sample roles;
+            List<String> tempRoles = new ArrayList<>();
+            tempRoles.add("ADMIN");
+            tempRoles.add("USER");
+            user.setRoles(tempRoles);
+            tempRoles.add("MANAGER");
+            user.setGroups(tempRoles);
+            user.setGender("Erkek");
+            userModel = new UserModelAdapter(session, realm, model, user);
+        }
+//        catch (WebApplicationException e) {
+        catch (Exception e) {
+//            System.out.println(username + " isimli user bulunamadi, donen response status: " + e.getResponse().getStatus());
+            System.out.println(username + " isimli user bulunamadi,hata: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return userModel;
+    }
 
-		if (verifyPasswordResponse == null)
-			return false;
+//    @Override
+//    public UserModel getUserByUsername(RealmModel realm, String username) {
+//        UserModel returnValue = null;
+//        User user = usersService.getUserByUserName(username);
+//        if (user != null) {
+//            returnValue = createAdapter(realm, username);
+//        }
+//        return returnValue;
+//    }
 
-		return verifyPasswordResponse.getResult();
-	}
+//    protected UserModel createAdapter(RealmModel realm, String username) {
+//
+//        // Create a new user adapter based on the AbstractUserAdapter class
+//        return new AbstractUserAdapter(session, realm, model) {
+//            // Override the getUsername method to return the username from the remote
+//            // service
+//            @Override
+//            public String getUsername() {
+//                return username;
+//            }
+//            @Override
+//            public SubjectCredentialManager credentialManager() {
+//                // Create a new credential manager based on the LegacyUserCredentialManager
+//                // class
+//                return new LegacyUserCredentialManager(session, realm, this) {
+//                };
+//            }
+//        };
+//    }
 
-	@Override
-	public UserModel getUserById(RealmModel realm, String id) {
-		StorageId storageId = new StorageId(id);
-		String username = storageId.getExternalId();
-		
-		return getUserByUsername(realm, username);
-	}
+    @Override
+    public boolean updateCredential(RealmModel realm, UserModel user, CredentialInput input) {
+//        log.debug("Keycloak taki user update olursa harici servisteki user i da update etmek istersek burasi yazilacak. Simdilik keycloak in user ini update etmek istemiyoruz");
+        return false;
+    }
 
-	@Override
-	public UserModel getUserByUsername(RealmModel realm, String username) {
-		UserModel returnValue = null;
+    @Override
+    public void disableCredentialType(RealmModel realm, UserModel user, String credentialType) {
+    }
 
-		User user = usersService.getUserByUserName(username);
+    @Override
+    public Stream<String> getDisableableCredentialTypesStream(RealmModel realm, UserModel user) {
+        return Stream.empty();
+    }
 
-		if (user != null) {
-			returnValue = createAdapter(realm, username);
-		}
+    @Override
+    public int getUsersCount(RealmModel realm) {
+//        return usersService.getUsersCount();
+        return 1; //Simdilik users count bos birakildi
+    }
 
-		return returnValue;
-	}
+    @Override
+    public Stream<UserModel> searchForUserStream(RealmModel realm, String search, Integer firstResult, Integer maxResults) {
+//        log.debug("searchForUserStream, search={}, first={}, max={}", search, firstResult, maxResults);
+//        return toUserModelStream(usersService.getUsers(search, firstResult, maxResults), realm);
+        return toUserModelStream(new ArrayList<User>(), realm);
+    }
 
-	@Override
-	public UserModel getUserByEmail(RealmModel realm, String email) {
-		return getUserByUsername(realm, email);
-	}
+    @Override
+    public Stream<UserModel> searchForUserStream(RealmModel realm, Map<String, String> params, Integer firstResult, Integer maxResults) {
+//        log.debug("searchForUserStream, params={}, first={}, max={}", params, firstResult, maxResults);
+//        return toUserModelStream(usersService.getUsers(null, firstResult, maxResults), realm);
+        return toUserModelStream(new ArrayList<User>(), realm);
+    }
 
-	@Override
-	public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
-		return user.credentialManager().isConfiguredFor(credentialType);
-	}
+    private Stream<UserModel> toUserModelStream(List<User> users, RealmModel realm) {
+//        log.debug("Provider dan alinan users size: {} ", users.size());
+        return users.stream().map(user -> new UserModelAdapter(session, realm, model, user));
+    }
 
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
+    @Override
+    public Stream<UserModel> getGroupMembersStream(RealmModel realm, GroupModel group, Integer firstResult, Integer maxResults) {
+        return Stream.empty();
+    }
 
-	}
+    @Override
+    public Stream<UserModel> searchForUserByUserAttributeStream(RealmModel realm, String attrName, String attrValue) {
+        return Stream.empty();
+    }
+
+    @Override
+    public UserModel addUser(RealmModel realm, String username) {
+        return null;
+    }
+
+    @Override
+    public boolean removeUser(RealmModel realm, UserModel user) {
+        return false;
+    }
 
 }
