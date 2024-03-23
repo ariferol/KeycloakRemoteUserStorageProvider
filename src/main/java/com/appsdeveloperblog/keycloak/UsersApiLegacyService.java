@@ -33,7 +33,7 @@ public class UsersApiLegacyService {
 			consumeUrl = this.serviceUrl + "/" + username;
 			System.out.println("Consume edilecek GET url: " + consumeUrl);
 			User user = SimpleHttp.doGet(consumeUrl, this.session).asJson(User.class);
-			if(user != null)
+			if(user != null && user.getEmail() != null && !user.getEmail().equals(""))
 				System.out.println("user eposta: "+ user.getEmail());
 			else
 				System.out.println("user bos geldi");
