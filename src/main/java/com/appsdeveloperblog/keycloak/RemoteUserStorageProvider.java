@@ -36,13 +36,16 @@ public class RemoteUserStorageProvider implements UserLookupProvider, Credential
 
     @Override
     public boolean supportsCredentialType(String credentialType) {
+        System.out.println("supportsCredentialType methodundaki credentialType : " + credentialType);
         return PasswordCredentialModel.TYPE.equals(credentialType);
     }
 
     @Override
     public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
+        System.out.println("isConfiguredFor methodundaki credentialType : " + credentialType);
         //new method
-        return supportsCredentialType(credentialType) && user.credentialManager().isConfiguredFor(credentialType);
+        //return supportsCredentialType(credentialType) && user.credentialManager().isConfiguredFor(credentialType);
+        return supportsCredentialType(credentialType);
     }
 
 //    @Override
