@@ -86,6 +86,8 @@ public class UserModelAdapter extends AbstractUserAdapter {
         attributes.add(UserModel.LAST_NAME, getLastName());
         attributes.add("dogum_tarihi", user.getBirthday());
         attributes.add("cinsiyet", user.getGender());
+        attributes.add("cep_tel", user.getCepTel());
+
         return attributes;
     }
 

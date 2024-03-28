@@ -35,8 +35,10 @@ public class UsersApiLegacyService {
 			User user = SimpleHttp.doGet(consumeUrl, this.session).asJson(User.class);
 			if(user != null && user.getEmail() != null && !user.getEmail().equals(""))
 				System.out.println("user eposta: "+ user.getEmail());
-			else
+			else{
 				System.out.println("user bos geldi");
+				return null;
+			}
 			return user;
 		} catch (IOException e) {
 			System.out.println("getUserByUsername exception a dustu; consumeUrl = " + consumeUrl );

@@ -104,16 +104,19 @@ public class RemoteUserStorageProvider implements UserLookupProvider, Credential
         UserModel userModel = null;
         try {
             User user = usersService.getUserByUserName(username);
-            user.setUserName(user.getEmail()); //Bu satir daha sonra kapatilacak!
-            //sample roles;
-            List<String> tempRoles = new ArrayList<>();
-            tempRoles.add("ADMIN");
-            tempRoles.add("USER");
-            user.setRoles(tempRoles);
-            tempRoles.add("MANAGER");
-            user.setGroups(tempRoles);
-            user.setGender("Erkek");
-            userModel = new UserModelAdapter(session, realm, model, user);
+            if(user != null) {
+                user.setUserName(user.getEmail()); //Bu satir daha sonra kapatilacak!
+                //sample roles;
+                List<String> tempRoles = new ArrayList<>();
+                tempRoles.add("ADMIN");
+                tempRoles.add("USER");
+                user.setRoles(tempRoles);
+                tempRoles.add("MANAGER");
+                user.setGroups(tempRoles);
+                user.setGender("Erkek");
+                user.setCepTel("+905544634037");
+                userModel = new UserModelAdapter(session, realm, model, user);
+            }
         }
 //        catch (WebApplicationException e) {
         catch (Exception e) {

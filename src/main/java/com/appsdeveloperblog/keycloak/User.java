@@ -14,8 +14,17 @@ public class User {
 	private String gender;
 	private List<String> groups;
 	private List<String> roles;
-    
-//	public String getRoles() {
+	private String cepTel;
+
+	public String getCepTel() {
+		return cepTel;
+	}
+
+	public void setCepTel(String cepTel) {
+		this.cepTel = cepTel;
+	}
+
+	//	public String getRoles() {
 //		return roles;
 //	}
 //	public void setRoles(String roles) {
